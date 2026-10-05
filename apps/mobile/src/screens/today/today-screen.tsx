@@ -145,7 +145,6 @@ export function TodayScreen() {
           next={next}
           tz={tz}
           limitsLabel={nextItem?.limitsLabel ?? ''}
-          snoozedUntil={nextItem?.current?.check.id === next.check.id ? (nextItem.current.snoozedUntil ?? null) : null}
         />
       ) : (
         <View style={{ backgroundColor: colors.passSoft, borderRadius: radius.lg, borderCurve: 'continuous', padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>

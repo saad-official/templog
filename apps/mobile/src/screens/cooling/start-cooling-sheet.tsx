@@ -12,7 +12,7 @@ import { PrimaryButton } from '@/components/primary-button';
 import { showToast } from '@/components/toast';
 import { icons } from '@/constants/icons';
 import { formatClock, startCooling } from '@/data';
-import { useKitchen } from '@/hooks/use-kitchen';
+import { useDisplayUnit, useKitchen } from '@/hooks/use-kitchen';
 import { useSettings } from '@/hooks/use-settings';
 import { haptics } from '@/native/haptics';
 import { spacing } from '@/theme';
@@ -33,7 +33,7 @@ function parseTemp(text: string): number | null {
 export function StartCoolingSheet() {
   const settings = useSettings();
   const kitchen = useKitchen();
-  const unit: Unit = settings.unit;
+  const unit: Unit = useDisplayUnit();
   const [name, setName] = useState('');
   const [ago, setAgo] = useState<number>(0);
   const [temp, setTemp] = useState('');

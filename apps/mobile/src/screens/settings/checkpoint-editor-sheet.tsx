@@ -14,9 +14,9 @@ import { PrimaryButton } from '@/components/primary-button';
 import { showToast } from '@/components/toast';
 import { KIND_OPTIONS } from '@/constants/checkpoint-presets';
 import { icons } from '@/constants/icons';
-import { addCheckpoint, archiveCheckpoint, deleteCheckpoint, updateCheckpoint } from '@/data';
+import { addCheckpoint, archiveCheckpoint, deleteCheckpoint, restoreCheckpoint, updateCheckpoint } from '@/data';
 import { useCheckpoint, useCheckpoints } from '@/hooks/use-checkpoints';
-import { useSettings } from '@/hooks/use-settings';
+import { useDisplayUnit } from '@/hooks/use-kitchen';
 import { haptics } from '@/native/haptics';
 import { radius, spacing, useTheme } from '@/theme';
 
@@ -55,7 +55,7 @@ export function CheckpointEditorSheet() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const existing = useCheckpoint(id);
   const all = useCheckpoints({ includeArchived: true });
-  const { unit } = useSettings();
+  const unit = useDisplayUnit();
   const { colors } = useTheme();
   const editing = !!existing;
   const initialKind: CheckpointKind = existing?.kind ?? 'cold-holding';
@@ -125,7 +125,15 @@ export function CheckpointEditorSheet() {
           deleteCheckpoint(existing.id)
             .then(() => {
               router.back();
-              showToast({ message: `${existing.name} deleted` });
+              showToast({
+                message: `${existing.name} deleted`,
+                actionLabel: 'Undo',
+                onAction: () => {
+                  restoreCheckpoint(existing.id)
+                    .then(() => showToast({ message: `${existing.name} restored` }))
+                    .catch(() => showToast({ message: "Couldn't restore. Please try again." }));
+                },
+              });
             })
             .catch(() => showToast({ message: "Couldn't delete. Please try again." })),
       },

@@ -136,6 +136,37 @@ export function expireCooling(item: CoolingItem, now: IsoString, unit: Unit = "F
   return { status: "failed", failedAt: dueAt, failReason: stageFailReason(stage, unit) };
 }
 
+/**
+ * Patch that undoes the item change made by the stage reading `readingId` (a reading logged by
+ * mistake): a stage pass reopens that stage, a stage fail reopens it and clears the reason and the
+ * corrective action, a stage-1 reading that completed both stages reopens stage 1. `{}` for a
+ * pending reading (it never changed the item). `null` when it cannot be undone on its own: a later
+ * stage-2 result or a stage-2 expiry sits on top of it, or the item was discarded since.
+ * The reopened stage may already be past its deadline; `expireCooling` then fails it again.
+ */
+export function revertCoolingReading(item: CoolingItem, readingId: string): Partial<CoolingItem> | null {
+  const s1 = item.stage1ReadingId === readingId;
+  const s2 = item.stage2ReadingId === readingId;
+  if (!s1 && !s2) return {};
+  if (item.status === "discarded") return null;
+  const clearFail = { failedAt: null, failReason: null, correctiveAction: null };
+  if (s1 && s2) {
+    if (item.status !== "done") return null;
+    return { status: "cooling", stage1ReadingId: null, stage2ReadingId: null, stage1At: null, completedAt: null };
+  }
+  if (s2) {
+    if (item.status === "done") return { status: "stage1-pass", stage2ReadingId: null, completedAt: null };
+    if (item.status === "failed") return { status: "stage1-pass", stage2ReadingId: null, ...clearFail };
+    return null;
+  }
+  // Stage-1 reading only.
+  if (item.stage2ReadingId) return null;
+  if (item.status === "stage1-pass") return { status: "cooling", stage1ReadingId: null, stage1At: null };
+  // Failed by this reading (a stage-1 fail never sets `stage1At`); with `stage1At` it was a stage-2 expiry.
+  if (item.status === "failed" && !item.stage1At) return { status: "cooling", stage1ReadingId: null, ...clearFail };
+  return null;
+}
+
 /** Patch for the "Discarded" action. */
 export function discardCooling(_item: CoolingItem, now: IsoString): Partial<CoolingItem> {
   return { status: "discarded", discardedAt: now };

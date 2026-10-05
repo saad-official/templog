@@ -17,8 +17,7 @@ import { SectionHeader } from '@/components/section-header';
 import { icons } from '@/constants/icons';
 import { formatClock } from '@/data';
 import { useCoolingItem } from '@/hooks/use-cooling-items';
-import { useKitchen } from '@/hooks/use-kitchen';
-import { useSettings } from '@/hooks/use-settings';
+import { useDisplayUnit, useKitchen } from '@/hooks/use-kitchen';
 import { radius, spacing, useTheme } from '@/theme';
 
 import { closedStamp, isOpen, stageLimitLabel } from './cooling-format';
@@ -70,7 +69,7 @@ export function CoolingDetailScreen() {
   const { itemId } = useLocalSearchParams<{ itemId: string }>();
   const item = useCoolingItem(itemId);
   const kitchen = useKitchen();
-  const { unit } = useSettings();
+  const unit = useDisplayUnit();
   const { colors } = useTheme();
   const tz = kitchen?.tz;
 

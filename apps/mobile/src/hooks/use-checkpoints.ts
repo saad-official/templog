@@ -2,8 +2,8 @@ import type { Checkpoint } from '@templog/shared/schemas';
 
 import { getCheckpoint, listCheckpoints } from '@/data/checkpoints-repo';
 import { getActiveKitchen } from '@/data/kitchen-repo';
+import { useKitchenToday } from '@/data/kitchen-time';
 import { useLiveQuery } from '@/data/store';
-import { useToday } from '@/data/time';
 import { checkpointHistory, type CheckpointHistory } from '@/data/views';
 
 const EMPTY: Checkpoint[] = [];
@@ -30,10 +30,10 @@ export function useCheckpoint(id: string | null | undefined): Checkpoint | null 
 
 /**
  * A checkpoint's history: shared `checkpointStats` over the last `days` days (min / max / avg /
- * fails / sparkline `points`) plus its 10 most recent readings and limits label. Rolls at midnight.
+ * fails / sparkline `points`) plus its 10 most recent readings and limits label. Rolls at the kitchen's midnight.
  */
 export function useCheckpointHistory(id: string | null | undefined, days = 7): CheckpointHistory | null {
-  const today = useToday();
+  const today = useKitchenToday();
   return useLiveQuery(
     `checkpoint-history:${id ?? ''}:${days}`,
     ['checkpoints', 'readings', 'kitchens', 'settings'],

@@ -15,9 +15,9 @@ import { SectionHeader } from '@/components/section-header';
 import { showToast } from '@/components/toast';
 import { cadenceSummary } from '@/constants/format';
 import { icons } from '@/constants/icons';
-import { archiveCheckpoint, updateCheckpoint } from '@/data';
+import { archiveCheckpoint, reorderCheckpoints } from '@/data';
 import { useCheckpoints } from '@/hooks/use-checkpoints';
-import { useSettings } from '@/hooks/use-settings';
+import { useDisplayUnit } from '@/hooks/use-kitchen';
 import { haptics } from '@/native/haptics';
 import { CHROME_FONT_CAP, spacing, useTheme } from '@/theme';
 
@@ -25,7 +25,7 @@ function edit(id?: string) {
   router.push(id ? { pathname: '/checkpoint-editor', params: { id } } : '/checkpoint-editor');
 }
 
-/** Swaps the sort order of two neighbours (renumbering the whole list keeps it dense and stable). */
+/** Moves a checkpoint one place and saves the whole order in one batch (dense, stable `sortOrder`). */
 async function move(list: Checkpoint[], index: number, delta: -1 | 1) {
   const target = index + delta;
   if (target < 0 || target >= list.length) return;
@@ -34,7 +34,7 @@ async function move(list: Checkpoint[], index: number, delta: -1 | 1) {
   const [item] = next.splice(index, 1);
   next.splice(target, 0, item!);
   try {
-    await Promise.all(next.map((c, i) => (c.sortOrder === i ? null : updateCheckpoint(c.id, { sortOrder: i }))));
+    await reorderCheckpoints(next.map((c) => c.id));
   } catch (e) {
     showToast({ message: e instanceof Error ? e.message : "Couldn't reorder." });
   }
@@ -76,7 +76,7 @@ function CheckpointLine({ checkpoint, subtitle, reorder, index, count, onMove }:
 /** Checkpoints: the live list (reorderable, in the order the Today board breaks ties), add, and archived ones. */
 export function CheckpointsScreen() {
   const all = useCheckpoints({ includeArchived: true });
-  const { unit } = useSettings();
+  const unit = useDisplayUnit();
   const [reorder, setReorder] = useState(false);
   const live = all.filter((c) => !c.archivedAt);
   const archived = all.filter((c) => c.archivedAt);

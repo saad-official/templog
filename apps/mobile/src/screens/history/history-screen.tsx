@@ -16,12 +16,11 @@ import { CountBadge, type PillStatus } from '@/components/status-pill';
 import { showToast } from '@/components/toast';
 import { formatDayLong, formatPercent, plural } from '@/constants/format';
 import { icons } from '@/constants/icons';
-import { deleteReading, formatClock, lastDays, todayKey } from '@/data';
+import { deleteReading, formatClock, lastKitchenDays, useKitchenToday } from '@/data';
 import { useCheckpoints } from '@/hooks/use-checkpoints';
 import { useCompliance } from '@/hooks/use-compliance';
-import { useKitchen } from '@/hooks/use-kitchen';
+import { useDisplayUnit, useKitchen } from '@/hooks/use-kitchen';
 import { useDayChecks, useReadings } from '@/hooks/use-readings';
-import { useSettings } from '@/hooks/use-settings';
 import { haptics } from '@/native/haptics';
 import { radius, spacing, useTheme } from '@/theme';
 
@@ -58,7 +57,11 @@ function confirmDelete(reading: Reading, what: string) {
       style: 'destructive',
       onPress: () =>
         deleteReading(reading)
-          .then(() => showToast({ message: 'Reading deleted' }))
+          .then((r) =>
+            showToast({
+              message: r.ok ? 'Reading deleted' : r.reason === 'not-undoable' ? "Can't delete: a later cooling reading or the timer's end came after it." : 'That reading was already deleted.',
+            }),
+          )
           .catch(() => showToast({ message: "Couldn't delete. Please try again." })),
     },
   ]);
@@ -70,14 +73,13 @@ function confirmDelete(reading: Reading, what: string) {
  */
 export function HistoryScreen() {
   const kitchen = useKitchen();
-  const { unit } = useSettings();
+  const unit = useDisplayUnit();
   const { colors } = useTheme();
-  const tz = kitchen?.tz;
-  const today = todayKey(tz);
+  const today = useKitchenToday();
   const [selected, setSelected] = useState(today);
   const [period, setPeriod] = useState<'7' | '30'>('7');
-  const summary = useCompliance(lastDays(Number(period), tz));
-  const strip = useCompliance(lastDays(STRIP_DAYS, tz));
+  const summary = useCompliance(lastKitchenDays(Number(period), today));
+  const strip = useCompliance(lastKitchenDays(STRIP_DAYS, today));
   const checks = useDayChecks(selected);
   const readings = useReadings({ from: selected, to: selected });
   const checkpoints = useCheckpoints({ includeArchived: true });

@@ -1,7 +1,8 @@
 // Time zones, "today", and ticking clocks for hooks whose result depends on the time (due /
 // overdue / missed checks every 30 s, cooling countdowns every 15 s, the day rolling at midnight).
 // Kitchen schedules are expanded in the kitchen's zone (`kitchen.tz`); helpers take the zone
-// explicitly and default to the device zone.
+// explicitly and default to the device zone. Kitchen-zone shortcuts (`kitchenDayKey`,
+// `lastKitchenDays`, `useKitchenToday`) live in `kitchen-time.ts`.
 import { addDaysToKey, type DayKey, dayKeyOf, zonedMidnight } from '@templog/shared/tz';
 import { getCalendars } from 'expo-localization';
 import { AppState } from 'react-native';
@@ -129,20 +130,40 @@ export function tickStore(ms: number): Store<number> {
 export const BOARD_TICK_MS = 30_000;
 export const COOLING_TICK_MS = 15_000;
 
-/** Local day key of the device, flipping at local midnight. */
-export const todayStore: Store<DayKey> = tickingStore(
-  () => todayKey(),
-  (fire) => {
-    const tz = deviceTimeZone();
-    const next = zonedMidnight(addDaysToKey(todayKey(tz), 1), tz);
-    // Cap the wait so a time-zone change or clock jump is noticed within an hour.
-    const id = setTimeout(fire, Math.min(Math.max(next - Date.now() + 250, 1000), 3_600_000));
-    return () => clearTimeout(id);
-  },
-  (a, b) => a === b,
-);
+const dayStores = new Map<string, Store<DayKey>>();
 
-/** Device-local day key; re-renders at local midnight (and on return to the foreground). */
+/**
+ * Local day key in `tz` (omitted: the device zone, re-read on every tick), flipping at local
+ * midnight in that zone. One store per zone, shared by every subscriber.
+ */
+export function dayStore(tz?: string): Store<DayKey> {
+  const key = tz ?? '';
+  let store = dayStores.get(key);
+  if (!store) {
+    const zone = () => tz ?? deviceTimeZone();
+    store = tickingStore(
+      () => todayKey(zone()),
+      (fire) => {
+        const z = zone();
+        const next = zonedMidnight(addDaysToKey(todayKey(z), 1), z);
+        // Cap the wait so a time-zone change or clock jump is noticed within an hour.
+        const id = setTimeout(fire, Math.min(Math.max(next - Date.now() + 250, 1000), 3_600_000));
+        return () => clearTimeout(id);
+      },
+      (a, b) => a === b,
+    );
+    dayStores.set(key, store);
+  }
+  return store;
+}
+
+/** Local day key of the device, flipping at local midnight. */
+export const todayStore: Store<DayKey> = dayStore();
+
+/**
+ * Device-local day key; re-renders at local midnight (and on return to the foreground). For
+ * device-only concerns; kitchen data (board, history, reports) uses `useKitchenToday()`.
+ */
 export function useToday(): DayKey {
   return useStore(todayStore);
 }

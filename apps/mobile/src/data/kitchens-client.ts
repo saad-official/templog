@@ -7,7 +7,7 @@ import type { Checkpoint, CorrectiveAction, Kitchen } from '@templog/shared/sche
 import { ApiError, apiFetch } from './api';
 import { isSignedIn } from './auth-client';
 import { createKitchen, getActiveKitchen, getKitchen, listKitchens, patchKitchen, setActiveKitchen } from './kitchen-repo';
-import { getAppValue, setAppValue } from './settings-repo';
+import { getAppValue, setAppValue, updateSettings } from './settings-repo';
 import { createStore } from './store';
 import { resetSyncCursors } from './sync-state-repo';
 import { deviceTimeZone, todayKey } from './time';
@@ -174,6 +174,7 @@ export async function createSharedKitchen(profile: MemberProfile = {}): Promise<
     // The account already owns another shared kitchen: work in that one (its rows arrive by sync).
     setAppValue('soloKitchenId', local.id);
     setActiveKitchen(kitchen.id);
+    updateSettings({ unit: kitchen.unit });
   } else if (kitchen.inviteCode) {
     patchKitchen(local.id, { joinCode: kitchen.inviteCode });
   }
@@ -185,8 +186,9 @@ export async function createSharedKitchen(profile: MemberProfile = {}): Promise<
 
 /**
  * POST /api/kitchens/join with a code. Switches this device to the joined kitchen (its checkpoints
- * and readings arrive with the next sync) as staff. Errors: 404 `kitchen_not_found`, 409 `own_kitchen`
- * / `kitchen_full`.
+ * and readings arrive with the next sync) as staff, and sets this device's `settings.unit` to the
+ * kitchen's unit (the display unit is `kitchen.unit`; the setting is the fallback until the kitchen
+ * row arrives). Errors: 404 `kitchen_not_found`, 409 `own_kitchen` / `kitchen_full`.
  */
 export async function joinKitchen(code: string, profile: MemberProfile = {}): Promise<SharedKitchenView> {
   const { kitchen } = await apiFetch<{ kitchen: SharedKitchenView }>('/api/kitchens/join', {
@@ -196,6 +198,7 @@ export async function joinKitchen(code: string, profile: MemberProfile = {}): Pr
   setAppValue('soloKitchenId', getActiveKitchen()?.id ?? null);
   resetSyncCursors(kitchen.id);
   setActiveKitchen(kitchen.id);
+  updateSettings({ unit: kitchen.unit });
   await refreshKitchens().catch(() => undefined);
   refreshActive();
   return kitchen;

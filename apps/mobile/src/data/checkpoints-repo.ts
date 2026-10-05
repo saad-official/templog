@@ -84,10 +84,31 @@ export function setCheckpointArchived(id: string, archived: boolean): Checkpoint
   return saveCheckpoint({ ...current, archivedAt: archived ? at : null, updatedAt: at });
 }
 
-export function markCheckpointDeleted(id: string): void {
+/** Soft-deletes (`deleted`) or un-deletes a checkpoint; `updatedAt` moves so sync carries either way. */
+export function markCheckpointDeleted(id: string, deleted = true): void {
   const at = nowIso();
-  db.update(checkpoints).set({ deletedAt: at, updatedAt: at }).where(eq(checkpoints.id, id)).run();
+  db.update(checkpoints).set({ deletedAt: deleted ? at : null, updatedAt: at }).where(eq(checkpoints.id, id)).run();
   notifyTables('checkpoints');
+}
+
+/**
+ * Renumbers `sortOrder` to the position in `ids` (0, 1, 2, …) in one transaction with one change
+ * notification. Unknown ids are skipped; rows already in place are not touched (no sync churn).
+ * Returns how many rows changed.
+ */
+export function setCheckpointOrder(ids: readonly string[]): number {
+  const at = nowIso();
+  let changed = 0;
+  db.transaction((tx) => {
+    ids.forEach((id, index) => {
+      const row = tx.select({ sortOrder: checkpoints.sortOrder }).from(checkpoints).where(eq(checkpoints.id, id)).get();
+      if (!row || row.sortOrder === index) return;
+      tx.update(checkpoints).set({ sortOrder: index, updatedAt: at }).where(eq(checkpoints.id, id)).run();
+      changed += 1;
+    });
+  });
+  if (changed) notifyTables('checkpoints');
+  return changed;
 }
 
 /** Raw rows including tombstones (sync). */

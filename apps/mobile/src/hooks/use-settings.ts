@@ -6,7 +6,7 @@ import { useLiveQuery } from '@/data/store';
 /**
  * Device settings (shared `SettingsSchema`, defaults applied; `DEFAULT_SETTINGS` until the database
  * is ready): `onboarded`, `unit` (display unit), `initialsDefault`, `reminderLeadMinutes`,
- * `quietOutsideHours`, `graceMinutes`. Write with `updateSettings(patch)` from `@/data`, which also
+ * `quietOutsideHours`, `graceMinutes`, `appearance` (`system` | `light` | `dark`). Write with `updateSettings(patch)` from `@/data`, which also
  * reschedules reminders when they are affected.
  */
 export function useSettings(): Settings {

@@ -9,13 +9,12 @@ import { type CheckpointBoardItem, formatClock } from '@/data';
 export function boardRowModel(item: CheckpointBoardItem, unit: Unit, tz: string, todayKey: string): Omit<CheckpointRowProps, 'pressed'> {
   const r = item.latestReading;
   const current = item.current;
-  const open = current && (current.state === 'due' || current.state === 'overdue');
-  const snoozed = open && current.snoozedUntil;
+  const snoozed = item.snoozedUntil;
   const readingDay = r ? dayKeyOf(r.takenAt, tz) : null;
   const readingTime = r ? formatClock(r.takenAt, tz) : '';
 
   let statusDetail: string | undefined;
-  if (snoozed) statusDetail = `until ${formatClock(current.snoozedUntil!, tz)}`;
+  if (snoozed) statusDetail = `until ${formatClock(snoozed, tz)}`;
   else if (current && (item.status === 'overdue' || item.status === 'due' || item.status === 'upcoming')) statusDetail = formatClock(current.check.scheduledFor, tz);
   else if (item.status === 'done') statusDetail = `${item.loggedToday}/${item.scheduledToday}`;
   else if (item.status === 'missed') statusDetail = `${item.missedToday} today`;

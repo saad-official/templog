@@ -1,3 +1,7 @@
+// Deep links Templog posts (notifications, widgets, Live Activities / Live Updates, server pushes)
+// → Expo Router hrefs. Builders live with the notifications adapter (`deepLinks` in
+// `./notifications`); the root layout routes what `startNativeServices({ onOpenUrl })` forwards:
+// `onOpenUrl: (url) => router.push(hrefFromUrl(url))`.
 import type { Href } from 'expo-router';
 
 const ROUTED = /^\/(today|history|log\/[^/?]+|cooling(\/[^/?]+)?)(\?.*)?$/;

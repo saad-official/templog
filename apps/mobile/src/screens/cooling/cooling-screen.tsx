@@ -14,9 +14,9 @@ import { Screen } from '@/components/screen';
 import { SectionHeader } from '@/components/section-header';
 import { formatDayShort } from '@/constants/format';
 import { icons } from '@/constants/icons';
-import { formatClock, lastDays } from '@/data';
+import { formatClock, lastKitchenDays, useKitchenToday } from '@/data';
 import { useCoolingHistory, useCoolingItems } from '@/hooks/use-cooling-items';
-import { useKitchen } from '@/hooks/use-kitchen';
+import { useDisplayUnit, useKitchen } from '@/hooks/use-kitchen';
 import { useSettings } from '@/hooks/use-settings';
 import { spacing } from '@/theme';
 
@@ -31,8 +31,9 @@ export function CoolingScreen() {
   const settings = useSettings();
   const items = useCoolingItems();
   const tz = kitchen?.tz;
-  const history = useCoolingHistory(lastDays(7, tz)).filter((i) => !isOpen(i.status));
-  const unit = settings.unit;
+  const today = useKitchenToday();
+  const history = useCoolingHistory(lastKitchenDays(7, today)).filter((i) => !isOpen(i.status));
+  const unit = useDisplayUnit();
   const lead = Math.max(MIN_DUE_LEAD, settings.reminderLeadMinutes);
 
   const start = () => router.push('/start-cooling');

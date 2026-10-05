@@ -13,7 +13,7 @@ import { COOLING_ACTIONS } from '@/constants/checkpoint-presets';
 import { icons } from '@/constants/icons';
 import { discardCooling, setCoolingCorrectiveAction } from '@/data';
 import { useCoolingItem } from '@/hooks/use-cooling-items';
-import { useSettings } from '@/hooks/use-settings';
+import { useDisplayUnit } from '@/hooks/use-kitchen';
 import { haptics } from '@/native/haptics';
 import { radius, spacing, useTheme } from '@/theme';
 
@@ -26,7 +26,7 @@ import { reheatLabel } from './cooling-format';
 export function CoolingActionSheet() {
   const { itemId, mode } = useLocalSearchParams<{ itemId: string; mode?: 'discard' | 'corrective' }>();
   const item = useCoolingItem(itemId);
-  const { unit } = useSettings();
+  const unit = useDisplayUnit();
   const { colors } = useTheme();
   const [note, setNote] = useState('');
   const [draft, setDraft] = useState<CorrectiveDraft>({ kind: null, note: '' });

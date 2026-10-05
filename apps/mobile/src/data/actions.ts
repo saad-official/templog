@@ -3,7 +3,13 @@
 // (reminders, cooling Live Activities / Live Updates, widgets) and schedules a kitchen sync.
 // Await the returned promise in headless contexts (notification actions, background task) so the
 // surfaces finish before JS is suspended; in UI code fire-and-forget is fine.
-import { type CoolingEvaluation, discardCooling as sharedDiscard, evaluateCooling, expireCooling } from '@templog/shared/cooling';
+import {
+  type CoolingEvaluation,
+  discardCooling as sharedDiscard,
+  evaluateCooling,
+  expireCooling,
+  revertCoolingReading,
+} from '@templog/shared/cooling';
 import { type Evaluation, evaluateReading } from '@templog/shared/limits';
 import { checkForReading, checkIdFor, DEFAULT_MISSED_AFTER_MINUTES } from '@templog/shared/schedule';
 import type {
@@ -28,16 +34,18 @@ import {
   markCheckpointDeleted,
   patchCheckpoint,
   setCheckpointArchived,
+  setCheckpointOrder,
 } from './checkpoints-repo';
 import { checksBetween, setCheckSnoozes } from './checks';
 import { getCoolingItem, insertCoolingItem, listActiveCoolingItems, saveCoolingItem } from './cooling-repo';
 import { ensureKitchen, getKitchen, type KitchenPatch, patchKitchen } from './kitchen-repo';
 import { newId } from './mappers';
-import { listReadingsForChecksBetween, saveReading } from './readings-repo';
+import { getReading, listCoolingReadings, listReadingsForChecksBetween, saveReading } from './readings-repo';
 import { wipeAllTables } from './reset';
 import { getSettings, updateSettings as writeSettings } from './settings-repo';
 import { scheduleSync } from './sync-client';
 import { nowIso } from './time';
+import { displayUnit } from './views';
 
 export const SNOOZE_MINUTES = 15;
 
@@ -67,7 +75,7 @@ export type LogReadingOptions = {
   /** Required when the reading fails (`evaluateReading`); `previewReading` tells the UI first. */
   correctiveAction?: CorrectiveAction | null;
   source: ReadingSource;
-  /** Unit of `valueInUnit`; defaults to the display unit (Settings). */
+  /** Unit of `valueInUnit`; defaults to the display unit (`kitchen.unit`). */
   unit?: Unit;
   /** Defaults to now. */
   takenAt?: string;
@@ -82,7 +90,7 @@ export type LogReadingResult =
  * Pass/fail for a value typed in `unit` (default: display unit) without saving: drive the keypad
  * colour and ask for a corrective action before calling `logReading`.
  */
-export function previewReading(checkpointId: string, valueInUnit: number, unit: Unit = getSettings().unit): Evaluation | null {
+export function previewReading(checkpointId: string, valueInUnit: number, unit: Unit = displayUnit()): Evaluation | null {
   const checkpoint = getCheckpoint(checkpointId);
   if (!checkpoint) return null;
   return evaluateReading(checkpoint, toStoredF(valueInUnit, unit), unit);
@@ -110,7 +118,7 @@ export function suggestedCheckFor(checkpointId: string, takenAt = nowIso()): str
 export async function logReading(checkpointId: string, valueInUnit: number, opts: LogReadingOptions): Promise<LogReadingResult> {
   const checkpoint = getCheckpoint(checkpointId);
   if (!checkpoint || checkpoint.deletedAt) return { ok: false, reason: 'not-found', evaluation: null };
-  const unit = opts.unit ?? getSettings().unit;
+  const unit = opts.unit ?? displayUnit();
   const valueF = toStoredF(valueInUnit, unit);
   const evaluation = evaluateReading(checkpoint, valueF, unit);
   if (evaluation.result === 'fail' && !opts.correctiveAction) {
@@ -143,11 +151,32 @@ export async function logReading(checkpointId: string, valueInUnit: number, opts
   return { ok: true, reading, evaluation };
 }
 
-/** Soft-deletes a reading logged by mistake (the check becomes open / missed again). */
-export async function deleteReading(reading: Reading): Promise<void> {
+export type DeleteReadingResult =
+  | { ok: true; reading: Reading; item: CoolingItem | null }
+  | { ok: false; reason: 'not-found' | 'not-undoable' };
+
+/**
+ * Soft-deletes a reading logged by mistake. A checkpoint reading: the check becomes open / missed
+ * again. A cooling-stage reading: the item change it made is reverted too (shared
+ * `revertCoolingReading`: the stage reopens, a fail's reason and corrective action are cleared);
+ * `not-undoable` when a later stage result, a stage-2 expiry or a discard sits on top of it.
+ */
+export async function deleteReading(reading: Reading): Promise<DeleteReadingResult> {
+  const current = getReading(reading.id);
+  if (!current || current.deletedAt) return { ok: false, reason: 'not-found' };
   const at = nowIso();
-  saveReading({ ...reading, deletedAt: at, updatedAt: at });
-  await afterWrite();
+  let item: CoolingItem | null = null;
+  if (current.coolingItemId) {
+    const cooling = getCoolingItem(current.coolingItemId);
+    if (cooling) {
+      const patch = revertCoolingReading(cooling, current.id);
+      if (!patch) return { ok: false, reason: 'not-undoable' };
+      item = Object.keys(patch).length ? saveCoolingItem({ ...cooling, ...patch, updatedAt: at }) : cooling;
+    }
+  }
+  const deleted = saveReading({ ...current, deletedAt: at, updatedAt: at });
+  await afterWrite(item ? { coolingItemIds: [item.id] } : {});
+  return { ok: true, reading: deleted, item };
 }
 
 /** "Snooze 15": the check's reminder re-fires in `minutes` (the check keeps its scheduled time). */
@@ -172,7 +201,7 @@ export type StartCoolingOptions = {
 /** Starts a two-stage cooling timer (stage 1: ≤ 70 °F within 2 h; stage 2: ≤ 41 °F within 6 h). */
 export async function startCooling(name: string, opts: StartCoolingOptions = {}): Promise<CoolingItem> {
   const kitchen = ensureKitchen();
-  const unit = opts.unit ?? getSettings().unit;
+  const unit = opts.unit ?? displayUnit();
   const item = insertCoolingItem({
     kitchenId: kitchen.id,
     name: name.trim(),
@@ -198,7 +227,7 @@ export type LogCoolingResult =
   | { ok: false; reason: 'corrective-action-required'; evaluation: CoolingEvaluation };
 
 /** Shared `evaluateCooling` for a value typed now, without saving (UI preview). */
-export function previewCoolingReading(itemId: string, valueInUnit: number, unit: Unit = getSettings().unit): CoolingEvaluation | null {
+export function previewCoolingReading(itemId: string, valueInUnit: number, unit: Unit = displayUnit()): CoolingEvaluation | null {
   const item = getCoolingItem(itemId);
   if (!item || (item.status !== 'cooling' && item.status !== 'stage1-pass')) return null;
   return evaluateCooling(item, toStoredF(valueInUnit, unit), nowIso(), { unit });
@@ -218,7 +247,7 @@ export async function logCoolingReading(
   const item = getCoolingItem(itemId);
   if (!item || item.deletedAt) return { ok: false, reason: 'not-found', evaluation: null };
   if (item.status !== 'cooling' && item.status !== 'stage1-pass') return { ok: false, reason: 'closed', evaluation: null };
-  const unit = opts.unit ?? getSettings().unit;
+  const unit = opts.unit ?? displayUnit();
   const valueF = toStoredF(valueInUnit, unit);
   const takenAt = opts.takenAt ?? nowIso();
   const readingId = newId();
@@ -255,6 +284,29 @@ export async function logCoolingReading(
   return { ok: true, reading, item: next, evaluation };
 }
 
+/**
+ * Undo for the cooling log sheet: soft-deletes the item's latest live stage reading and reverts the
+ * item change it made (see `deleteReading`), then refreshes reminders, the Live Activity / Live
+ * Update and widgets. Pass `readingId` to undo only if that reading is still the latest
+ * (`not-last` otherwise). A reopened stage that is already past its deadline auto-fails again on
+ * the next cooling tick.
+ */
+export async function undoCoolingReading(
+  itemId: string,
+  opts: { readingId?: string } = {},
+): Promise<{ ok: true; reading: Reading; item: CoolingItem | null } | { ok: false; reason: 'not-found' | 'no-reading' | 'not-last' | 'not-undoable' }> {
+  const item = getCoolingItem(itemId);
+  if (!item || item.deletedAt) return { ok: false, reason: 'not-found' };
+  const readings = listCoolingReadings([itemId]);
+  const last = readings.reduce<Reading | null>(
+    (latest, r) => (!latest || r.takenAt > latest.takenAt || (r.takenAt === latest.takenAt && r.createdAt > latest.createdAt) ? r : latest),
+    null,
+  );
+  if (!last) return { ok: false, reason: 'no-reading' };
+  if (opts.readingId && last.id !== opts.readingId) return { ok: false, reason: 'not-last' };
+  return deleteReading(last);
+}
+
 /** "Discarded": closes the timer with a discard corrective action. */
 export async function discardCooling(itemId: string, note?: string): Promise<CoolingItem | null> {
   const item = getCoolingItem(itemId);
@@ -288,7 +340,7 @@ export async function setCoolingCorrectiveAction(itemId: string, action: Correct
  */
 export function expireOverdueCooling(now = nowIso()): string[] {
   const kitchen = ensureKitchen();
-  const unit = getSettings().unit;
+  const unit = displayUnit();
   const failed: string[] = [];
   for (const item of listActiveCoolingItems(kitchen.id)) {
     const patch = expireCooling(item, now, unit);
@@ -324,10 +376,30 @@ export async function archiveCheckpoint(id: string, archived = true): Promise<Ch
   return checkpoint;
 }
 
-/** Soft-deletes a checkpoint (its readings stay in history and reports). */
+/** Soft-deletes a checkpoint (its readings stay in history and reports). Undo with `restoreCheckpoint`. */
 export async function deleteCheckpoint(id: string): Promise<void> {
   markCheckpointDeleted(id);
   await afterWrite();
+}
+
+/** Brings back a soft-deleted checkpoint (Undo after delete): its checks and reminders return. */
+export async function restoreCheckpoint(id: string): Promise<Checkpoint | null> {
+  const current = getCheckpoint(id);
+  if (!current) return null;
+  if (current.deletedAt) {
+    markCheckpointDeleted(id, false);
+    await afterWrite();
+  }
+  return getCheckpoint(id);
+}
+
+/**
+ * Saves a new checkpoint order (Reorder mode): `ids` in display order become `sortOrder` 0…n-1 in
+ * one transaction, with one surface refresh and one sync schedule. Unknown ids are skipped.
+ */
+export async function reorderCheckpoints(ids: readonly string[]): Promise<void> {
+  if (!setCheckpointOrder(ids)) return;
+  await afterWrite({ skipNotifications: true });
 }
 
 /**

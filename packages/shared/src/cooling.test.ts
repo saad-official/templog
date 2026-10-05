@@ -8,6 +8,7 @@ import {
   expireCooling,
   formatMinutes,
   nextCoolingPrompt,
+  revertCoolingReading,
 } from "./cooling";
 import type { CoolingItem } from "./schemas";
 
@@ -119,6 +120,69 @@ describe("expireCooling", () => {
     expect(expireCooling(item(), at(119))).toBeNull();
     expect(expireCooling(item(), at(120))).toBeNull();
     expect(expireCooling(item({ status: "done" }), at(999))).toBeNull();
+  });
+});
+
+describe("revertCoolingReading", () => {
+  const OTHER = "0199b3a0-0000-7000-8000-0000000000f2";
+  const apply = (base: CoolingItem, value: number, minutes: number) => {
+    const e = evaluateCooling(base, value, at(minutes), { readingId: RID });
+    return { ...base, ...e.patch, ...(e.readingResult === "fail" ? { correctiveAction: { kind: "discard" as const } } : {}) };
+  };
+  /** The item's open-stage fields, with missing ones read as null. */
+  const fields = (i: CoolingItem) => ({
+    status: i.status,
+    stage1ReadingId: i.stage1ReadingId ?? null,
+    stage1At: i.stage1At ?? null,
+    stage2ReadingId: i.stage2ReadingId ?? null,
+    completedAt: i.completedAt ?? null,
+    failedAt: i.failedAt ?? null,
+    failReason: i.failReason ?? null,
+    correctiveAction: i.correctiveAction ?? null,
+  });
+
+  it("undoes a stage-1 pass back to cooling", () => {
+    const after = apply(item(), 68, 100);
+    expect({ ...after, ...revertCoolingReading(after, RID) }).toMatchObject({ status: "cooling", stage1ReadingId: null, stage1At: null });
+  });
+  it("undoes a stage-1 reading that completed both stages", () => {
+    const after = apply(item(), 40, 110);
+    expect(fields({ ...after, ...revertCoolingReading(after, RID) })).toEqual(fields(item()));
+  });
+  it("undoes a stage-1 fail and its corrective action", () => {
+    const after = apply(item(), 75, 125);
+    expect(fields({ ...after, ...revertCoolingReading(after, RID) })).toEqual(fields(item()));
+  });
+  it("undoes a stage-2 pass back to stage1-pass, keeping the stage-1 reading", () => {
+    const base = item({ status: "stage1-pass", stage1ReadingId: OTHER, stage1At: at(90) });
+    const after = apply(base, 40, 300);
+    expect({ ...after, ...revertCoolingReading(after, RID) }).toMatchObject({
+      status: "stage1-pass",
+      stage1ReadingId: OTHER,
+      stage1At: at(90),
+      stage2ReadingId: null,
+      completedAt: null,
+    });
+  });
+  it("undoes a stage-2 fail and its corrective action", () => {
+    const base = item({ status: "stage1-pass", stage1ReadingId: OTHER, stage1At: at(90) });
+    const after = apply(base, 45, 365);
+    expect({ ...after, ...revertCoolingReading(after, RID) }).toMatchObject({
+      status: "stage1-pass",
+      stage1ReadingId: OTHER,
+      stage2ReadingId: null,
+      failedAt: null,
+      failReason: null,
+      correctiveAction: null,
+    });
+  });
+  it("changes nothing on the item for a pending reading", () => {
+    expect(revertCoolingReading(item(), RID)).toEqual({});
+  });
+  it("refuses to undo stage 1 under a later stage-2 result, a stage-2 expiry or a discard", () => {
+    expect(revertCoolingReading(item({ status: "done", stage1ReadingId: RID, stage1At: at(90), stage2ReadingId: OTHER }), RID)).toBeNull();
+    expect(revertCoolingReading(item({ status: "failed", stage1ReadingId: RID, stage1At: at(90), failedAt: at(360) }), RID)).toBeNull();
+    expect(revertCoolingReading(item({ status: "discarded", stage1ReadingId: RID, stage1At: at(90) }), RID)).toBeNull();
   });
 });
 

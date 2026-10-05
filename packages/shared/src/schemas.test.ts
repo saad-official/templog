@@ -162,8 +162,14 @@ describe("SettingsSchema", () => {
       reminderLeadMinutes: 15,
       quietOutsideHours: true,
       graceMinutes: 30,
+      appearance: "system",
     });
     expect(SettingsSchema.parse({ unit: "C", initialsDefault: "SK" }).initialsDefault).toBe("SK");
+  });
+  it("accepts the appearance override and rejects unknown values", () => {
+    expect(SettingsSchema.parse({ appearance: "dark" }).appearance).toBe("dark");
+    expect(SettingsSchema.parse({ appearance: "light" }).appearance).toBe("light");
+    expect(SettingsSchema.safeParse({ appearance: "sepia" }).success).toBe(false);
   });
 });
 

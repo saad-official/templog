@@ -144,6 +144,8 @@ export const CoolingItemSchema = z.object({
   ...syncFields,
 });
 
+export const AppearanceSchema = z.enum(["system", "light", "dark"]);
+
 export const SettingsSchema = z.object({
   onboarded: z.boolean().default(false),
   /** Device display unit. */
@@ -155,6 +157,8 @@ export const SettingsSchema = z.object({
   quietOutsideHours: z.boolean().default(true),
   /** Minutes after `scheduledFor` that a check may still be logged on time (see `dueChecks`). */
   graceMinutes: z.number().int().min(0).max(240).default(30),
+  /** Device colour scheme override: follow the system, or force light / dark. */
+  appearance: AppearanceSchema.default("system"),
 });
 
 export const DEFAULT_SETTINGS: Settings = SettingsSchema.parse({});
@@ -232,6 +236,7 @@ export type Reading = z.infer<typeof ReadingSchema>;
 export type CoolingStatus = z.infer<typeof CoolingStatusSchema>;
 export type CoolingItem = z.infer<typeof CoolingItemSchema>;
 export type Settings = z.infer<typeof SettingsSchema>;
+export type Appearance = z.infer<typeof AppearanceSchema>;
 export type KitchenMember = z.infer<typeof KitchenMemberSchema>;
 export type Device = z.infer<typeof DeviceSchema>;
 export type SyncTables = z.infer<typeof SyncTablesSchema>;

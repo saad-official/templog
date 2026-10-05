@@ -20,10 +20,9 @@ import { Skeleton } from '@/components/skeleton';
 import { Sparkline } from '@/components/sparkline';
 import { cadenceSummary, formatDayShort } from '@/constants/format';
 import { icons } from '@/constants/icons';
-import { formatClock } from '@/data';
+import { formatClock, useKitchenToday } from '@/data';
 import { useCheckpointHistory } from '@/hooks/use-checkpoints';
-import { useKitchen } from '@/hooks/use-kitchen';
-import { useSettings } from '@/hooks/use-settings';
+import { useDisplayUnit, useKitchen } from '@/hooks/use-kitchen';
 import { radius, spacing, useTheme } from '@/theme';
 
 const PERIODS = [
@@ -51,7 +50,8 @@ export function CheckpointHistoryScreen() {
   const [period, setPeriod] = useState<'7' | '30'>('7');
   const history = useCheckpointHistory(id, Number(period));
   const kitchen = useKitchen();
-  const { unit } = useSettings();
+  const unit = useDisplayUnit();
+  const today = useKitchenToday();
   const { colors } = useTheme();
   const tz = kitchen?.tz;
 
@@ -75,7 +75,6 @@ export function CheckpointHistoryScreen() {
   const spoken = stats.count
     ? `${stats.count} readings, lowest ${t(stats.min)}, highest ${t(stats.max)}, ${stats.fails} out of range`
     : 'No readings in this period';
-  const today = tz ? dayKeyOf(new Date().toISOString(), tz) : null;
 
   return (
     <Screen>

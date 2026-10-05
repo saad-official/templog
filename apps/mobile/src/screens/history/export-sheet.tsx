@@ -9,7 +9,7 @@ import { PrimaryButton } from '@/components/primary-button';
 import { showToast } from '@/components/toast';
 import { formatDayShort, formatPercent } from '@/constants/format';
 import { icons } from '@/constants/icons';
-import { type DayRange, reportModel, todayKey } from '@/data';
+import { type DayRange, reportModel, useKitchenToday } from '@/data';
 import { useCompliance } from '@/hooks/use-compliance';
 import { useKitchen } from '@/hooks/use-kitchen';
 import { haptics } from '@/native/haptics';
@@ -52,8 +52,7 @@ function failureMessage(r: Extract<ExportResult, { ok: false }>): string {
 export function ExportSheet() {
   const kitchen = useKitchen();
   const { colors } = useTheme();
-  const tz = kitchen?.tz;
-  const today = todayKey(tz);
+  const today = useKitchenToday();
   const [key, setKey] = useState<RangeKey>('week');
   const range = rangeFor(key, today);
   const summary = useCompliance(range);

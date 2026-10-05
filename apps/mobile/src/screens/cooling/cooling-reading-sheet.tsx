@@ -17,9 +17,10 @@ import { ResultStamp, type StampResult } from '@/components/result-stamp';
 import { showToast } from '@/components/toast';
 import { COOLING_ACTIONS } from '@/constants/checkpoint-presets';
 import { icons } from '@/constants/icons';
-import { logCoolingReading, previewCoolingReading } from '@/data';
+import { logCoolingReading, previewCoolingReading, undoCoolingReading } from '@/data';
 import { useCoolingItem } from '@/hooks/use-cooling-items';
 import { entryFromNumber, useKeypadEntry } from '@/hooks/use-keypad-entry';
+import { useDisplayUnit } from '@/hooks/use-kitchen';
 import { useSettings } from '@/hooks/use-settings';
 import { haptics } from '@/native/haptics';
 import { radius, spacing, useTheme } from '@/theme';
@@ -47,7 +48,8 @@ export function CoolingReadingSheet() {
   const settings = useSettings();
   const reduced = useReducedMotion();
   const { colors } = useTheme();
-  const [unit, setUnit] = useState<Unit>(settings.unit);
+  const displayUnit = useDisplayUnit();
+  const [unit, setUnit] = useState<Unit>(displayUnit);
   const entry = useKeypadEntry();
   const [initials, setInitials] = useState(settings.initialsDefault ?? '');
   const [step, setStep] = useState<'entry' | 'action'>('entry');
@@ -119,7 +121,20 @@ export function CoolingReadingSheet() {
             : res.item.status === 'done'
               ? `${item.name}: cooled. Timer closed`
               : `${item.name}: stage 1 met. Stage 2 running`;
-      showToast({ message });
+      const readingId = res.reading.id;
+      showToast({
+        message,
+        actionLabel: 'Undo',
+        onAction: () => {
+          undoCoolingReading(item.id, { readingId })
+            .then((r) =>
+              showToast({
+                message: r.ok ? 'Reading removed' : r.reason === 'not-undoable' ? "Can't undo: a later reading or the timer's end came after it." : "Couldn't undo. The reading may already be gone.",
+              }),
+            )
+            .catch(() => showToast({ message: "Couldn't undo. Please try again." }));
+        },
+      });
       closeTimer.current = setTimeout(() => router.back(), reduced ? 450 : 850);
     } catch (e) {
       haptics.warning();

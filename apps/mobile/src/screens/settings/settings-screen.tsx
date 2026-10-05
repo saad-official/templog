@@ -1,3 +1,4 @@
+import type { Appearance } from '@templog/shared/schemas';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
@@ -16,7 +17,6 @@ import { plural } from '@/constants/format';
 import { icons } from '@/constants/icons';
 import { FOOD_SAFETY_DISCLAIMER, links } from '@/constants/links';
 import { deleteAllLocalData, exportAll, seedDemoData, updateSettings } from '@/data';
-import { setAppearance, useAppearance, type AppearancePreference } from '@/hooks/use-appearance';
 import { useCheckpoints } from '@/hooks/use-checkpoints';
 import { useSharedKitchens } from '@/hooks/use-kitchen-members';
 import { useKitchen } from '@/hooks/use-kitchen';
@@ -44,7 +44,6 @@ export function SettingsScreen() {
   const kitchen = useKitchen();
   const checkpoints = useCheckpoints();
   const settings = useSettings();
-  const appearance = useAppearance();
   const permission = useNotificationPermission();
   const { data: session } = useSession();
   const { active } = useSharedKitchens();
@@ -135,7 +134,7 @@ export function SettingsScreen() {
 
       <View style={{ gap: spacing.xs }}>
         <SectionHeader title="Appearance" />
-        <SegmentedControl accessibilityLabel="Appearance" options={APPEARANCE} value={appearance} onChange={(v: AppearancePreference) => setAppearance(v)} />
+        <SegmentedControl accessibilityLabel="Appearance" options={APPEARANCE} value={settings.appearance} onChange={(appearance: Appearance) => save({ appearance })} />
       </View>
 
       <View style={{ gap: spacing.xs }}>

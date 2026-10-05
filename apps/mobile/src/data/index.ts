@@ -16,6 +16,7 @@ export { buildAllDataExport, fullHistoryRange, type AllDataExport } from './expo
 export { exportAll } from '@/native/exports';
 export { ensureKitchen, getActiveKitchen, getKitchen, listKitchens, type KitchenPatch } from './kitchen-repo';
 export * from './kitchens-client';
+export { kitchenDayKey, kitchenTimeZone, lastKitchenDays, useKitchenTimeZone, useKitchenToday } from './kitchen-time';
 export { DEFAULT_OPENING_HOURS } from './mappers';
 export { ensureDatabaseReady, useDatabaseMigrations, type DatabaseReadyState } from './migrate';
 export { getReading, listReadingsBetween, recentReadings } from './readings-repo';

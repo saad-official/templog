@@ -21,7 +21,7 @@ import { icons } from '@/constants/icons';
 import { deleteReading, formatClock, logReading, previewReading, suggestedCheckFor } from '@/data';
 import { useCheckpoint } from '@/hooks/use-checkpoints';
 import { entryFromNumber, useKeypadEntry } from '@/hooks/use-keypad-entry';
-import { useKitchen } from '@/hooks/use-kitchen';
+import { useDisplayUnit, useKitchen } from '@/hooks/use-kitchen';
 import { useSettings } from '@/hooks/use-settings';
 import { haptics } from '@/native/haptics';
 import { CHROME_FONT_CAP, radius, spacing, touchTarget, useTheme } from '@/theme';
@@ -85,7 +85,8 @@ export function LogReadingSheet() {
   const { colors } = useTheme();
   const tz = kitchen?.tz;
 
-  const [unit, setUnit] = useState<Unit>(settings.unit);
+  const displayUnit = useDisplayUnit();
+  const [unit, setUnit] = useState<Unit>(displayUnit);
   const entry = useKeypadEntry();
   const [initials, setInitials] = useState(settings.initialsDefault ?? '');
   const [suggested] = useState<string | null>(() => params.scheduledFor ?? (checkpointId ? suggestedCheckFor(checkpointId) : null));
@@ -163,7 +164,7 @@ export function LogReadingSheet() {
         actionLabel: 'Undo',
         onAction: () => {
           deleteReading(reading)
-            .then(() => showToast({ message: 'Reading removed' }))
+            .then((r) => showToast({ message: r.ok ? 'Reading removed' : 'That reading was already removed.' }))
             .catch(() => showToast({ message: "Couldn't undo. Delete it from History." }));
         },
       });

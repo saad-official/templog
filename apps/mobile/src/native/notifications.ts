@@ -380,7 +380,8 @@ function planAll(now: number): Planned[] {
   const open = classifyChecks(checks, readings, new Date(now).toISOString(), settings.graceMinutes, DEFAULT_MISSED_AFTER_MINUTES)
     .filter((e) => e.state === 'upcoming' || e.state === 'due')
     .map((e) => e.check);
-  const cooling = planCoolingNotifications(listActiveCoolingItems(kitchen.id), settings, kitchen.tz, now);
+  // Cooling limits are phrased in the display unit (`kitchen.unit`).
+  const cooling = planCoolingNotifications(listActiveCoolingItems(kitchen.id), { ...settings, unit: kitchen.unit }, kitchen.tz, now);
   const checkPlans = planCheckNotifications(kitchen, checkpoints, open, settings, now);
   // Cooling first (food safety deadlines), then checks by time, within the OS limit.
   return [...cooling.sort((a, b) => a.date - b.date), ...checkPlans.sort((a, b) => a.date - b.date)].slice(0, MAX_SCHEDULED);

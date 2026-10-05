@@ -18,9 +18,9 @@ type Next = NonNullable<TodayBoard['next']>;
  * The floating "due now" card (the only glass surface): the next check to act on, when it is due,
  * and the big Log button (one tap to the keypad). Overdue tints heat, due tints amber.
  */
-export function DueNowCard({ next, tz, limitsLabel, snoozedUntil }: { next: Next; tz: string; limitsLabel: string; snoozedUntil: string | null }) {
+export function DueNowCard({ next, tz, limitsLabel }: { next: Next; tz: string; limitsLabel: string }) {
   const { colors } = useTheme();
-  const { checkpoint, check, state, minutesUntil } = next;
+  const { checkpoint, check, state, minutesUntil, snoozedUntil } = next;
   const open = state === 'due' || state === 'overdue';
   const time = formatClock(check.scheduledFor, tz);
   const heading = state === 'overdue' ? 'Overdue' : state === 'due' ? 'Due now' : 'Next check';

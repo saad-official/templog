@@ -32,17 +32,21 @@ const HOUR = 3_600_000;
 
 export type KitchenContext = { kitchen: Kitchen; settings: Settings; unit: Unit };
 
-/** The active kitchen with the device settings and display unit, or null before setup. */
+/** The active kitchen with the device settings and the display unit (`kitchen.unit`), or null before setup. */
 export function kitchenContext(): KitchenContext | null {
   const kitchen = getActiveKitchen();
   if (!kitchen) return null;
   const settings = getSettings();
-  return { kitchen, settings, unit: settings.unit };
+  return { kitchen, settings, unit: kitchen.unit };
 }
 
-/** Display unit of this device (Settings → unit). Readings are typed and shown in it. */
+/**
+ * The display unit: the active kitchen's `unit` (one unit per kitchen, so every phone of a shared
+ * kitchen types and reads the same numbers). `settings.unit` is only the fallback before a kitchen
+ * exists; `updateKitchen({ unit })` and `joinKitchen` keep it in line.
+ */
 export function displayUnit(): Unit {
-  return getSettings().unit;
+  return getActiveKitchen()?.unit ?? getSettings().unit;
 }
 
 // ---------------------------------------------------------------------------
@@ -89,6 +93,8 @@ export type CheckpointBoardItem = {
   missedToday: number;
   loggedToday: number;
   scheduledToday: number;
+  /** When `current` is due / overdue and its reminder is snoozed: the snooze end (else null). */
+  snoozedUntil: string | null;
 };
 
 export type TodayBoard = {
@@ -96,8 +102,11 @@ export type TodayBoard = {
   unit: Unit;
   dayKey: DayKey;
   items: CheckpointBoardItem[];
-  /** Shared `nextCheck` over today's and still-open checks, with its checkpoint. */
-  next: (NextCheck & { checkpoint: Checkpoint }) | null;
+  /**
+   * Shared `nextCheck` over today's and still-open checks, with its checkpoint and the snooze end of
+   * its reminder (`snoozedUntil`, null when not snoozed).
+   */
+  next: (NextCheck & { checkpoint: Checkpoint; snoozedUntil: string | null }) | null;
   /** Today so far (shared `dailyCompliance` with `now`). `rate` is null before anything is due. */
   compliance: DailyCompliance;
   counts: { due: number; overdue: number; missed: number; logged: number; upcoming: number };
@@ -155,6 +164,7 @@ export function todayBoard(now = nowIso()): TodayBoard | null {
       missedToday,
       loggedToday,
       scheduledToday: today.length,
+      snoozedUntil: open?.snoozedUntil ?? null,
     };
   });
   items.sort(
@@ -178,7 +188,13 @@ export function todayBoard(now = nowIso()): TodayBoard | null {
     unit: ctx.unit,
     dayKey: day,
     items,
-    next: nxt ? { ...nxt, checkpoint: byId.get(nxt.check.checkpointId)! } : null,
+    next: nxt
+      ? {
+          ...nxt,
+          checkpoint: byId.get(nxt.check.checkpointId)!,
+          snoozedUntil: liveViews.find((v) => v.check.id === nxt.check.id)?.snoozedUntil ?? null,
+        }
+      : null,
     compliance: dailyCompliance(
       todays.map((v) => v.check),
       todays.flatMap((v) => v.readings),

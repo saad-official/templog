@@ -11,12 +11,12 @@ describe("package entry", () => {
       // units
       "roundTenth", "toF", "toC", "convert", "toStoredF", "displayTemp", "formatTemp",
       // schemas
-      "KitchenSchema", "CheckpointSchema", "ReadingSchema", "CoolingItemSchema", "SettingsSchema", "DEFAULT_SETTINGS",
+      "KitchenSchema", "CheckpointSchema", "ReadingSchema", "CoolingItemSchema", "SettingsSchema", "DEFAULT_SETTINGS", "AppearanceSchema",
       "KitchenMemberSchema", "DeviceSchema", "JoinCodeSchema", "SyncPushRequestSchema", "SyncPullResponseSchema",
       "SyncPushResponseSchema", "SYNC_TABLE_NAMES", "CHECKPOINT_KINDS",
       // limits, cooling
       "FOOD_CODE_DEFAULTS", "COOKING_MINIMUMS_F", "defaultLimitsFor", "evaluateReading", "limitsLabel", "kindLabel", "checkpointTone",
-      "COOLING_LIMITS", "coolingDeadlines", "evaluateCooling", "expireCooling", "discardCooling", "nextCoolingPrompt",
+      "COOLING_LIMITS", "coolingDeadlines", "evaluateCooling", "expireCooling", "discardCooling", "nextCoolingPrompt", "revertCoolingReading",
       "coolingProgress", "coolingLabel", "formatMinutes",
       // schedule, compliance, report
       "checkIdFor", "expandChecks", "classifyChecks", "dueChecks", "missedChecks", "nextCheck", "checkForReading",

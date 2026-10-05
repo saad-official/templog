@@ -18,7 +18,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import { AppText } from '@/components/app-text';
 import { PrimaryButton } from '@/components/primary-button';
-import { useSettings } from '@/hooks/use-settings';
+import { useDisplayUnit } from '@/hooks/use-kitchen';
 import { haptics } from '@/native/haptics';
 import { radius, spacing, touchTarget, useTheme } from '@/theme';
 
@@ -86,7 +86,7 @@ function Dot({ index, width, scrollX }: { index: number; width: number; scrollX:
 /** Three short pages (parallax art, page dots, a haptic tick per page), then kitchen setup. */
 export function WelcomeScreen() {
   const { colors } = useTheme();
-  const { unit } = useSettings();
+  const unit = useDisplayUnit();
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const reduced = useReducedMotion();
