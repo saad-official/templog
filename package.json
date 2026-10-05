@@ -2,7 +2,7 @@
   "name": "templog",
   "private": true,
   "version": "0.1.0",
-  "description": "Templog desc",
+  "description": "Templog: free food-safety temperature log for small kitchens. Expo app (iOS + Android) with scheduled checks, FDA cooling timers as Live Activities, widgets, inspector PDF; Next.js landing + sync API.",
   "packageManager": "pnpm@12.8.1",
   "engines": { "node": ">=22.13.0 || >=24.3.0" },
   "scripts": {
