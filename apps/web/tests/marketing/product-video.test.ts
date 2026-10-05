@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { findProductVideo, PRODUCT_VIDEO } from "@/lib/marketing/product-video";
 
 describe("findProductVideo", () => {
-  it("returns nothing when public/video/templog.mp4 is missing, so the CSS mock renders", () => {
+  it("returns nothing when public/video/templog.mp4 is missing, so no empty player renders", () => {
     const empty = mkdtempSync(path.join(tmpdir(), "templog-video-"));
     expect(findProductVideo(empty)).toBeNull();
   });

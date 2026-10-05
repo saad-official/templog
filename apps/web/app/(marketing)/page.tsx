@@ -12,6 +12,7 @@ import {
   TodayScreen,
   WidgetMock,
 } from "@/components/marketing/device-mocks";
+import { ProductVideo } from "@/components/marketing/product-video";
 import { FAQ, INCUMBENTS, STEPS } from "@/lib/marketing/content";
 import { findProductVideo } from "@/lib/marketing/product-video";
 
@@ -31,23 +32,18 @@ function Section({ id, title, intro, children }: { id: string; title: string; in
   );
 }
 
-function HeroMedia() {
+/** The product preview below the hero, only when the recording is in public/video/ at build time. */
+function Preview() {
   const video = findProductVideo();
-  if (video) {
-    return (
-      <video
-        className="mx-auto w-[300px] max-w-full rounded-[42px] shadow-lg ring-1 ring-edge"
-        src={video.src}
-        poster={video.poster}
-        controls
-        muted
-        playsInline
-        preload="metadata"
-      >
-        Templog logging a reading and running a cooling timer.
-      </video>
-    );
-  }
+  if (!video) return null;
+  return (
+    <section aria-label="Product preview" className="mx-auto max-w-6xl px-4 pt-16 sm:px-8">
+      <ProductVideo src={video.src} poster={video.poster} />
+    </section>
+  );
+}
+
+function HeroMedia() {
   return (
     <figure className="relative mx-auto flex flex-col items-center gap-6 lg:block lg:h-[640px] lg:w-full">
       <figcaption className="sr-only">
@@ -335,6 +331,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <Preview />
       <HowItWorks />
       <NativeFeatures />
       <Cooling />
