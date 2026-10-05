@@ -70,7 +70,7 @@
         {
           "backgroundColor": "#F2F4F5",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 96,
+          "imageWidth": 120,
           "dark": {
             "backgroundColor": "#0F1416"
           }
