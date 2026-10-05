@@ -168,7 +168,7 @@ export const KitchenMemberSchema = z.object({
   userId: z.string().min(1),
   displayName: z.string().trim().min(1).max(80),
   initials: InitialsSchema.nullish(),
-  role: z.enum(["owner", "member"]),
+  role: z.enum(["owner", "staff"]),
   joinedAt: IsoTimestamp,
   ...syncFields,
 });
