@@ -4,12 +4,19 @@
     "slug": "templog",
     "version": "0.1.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/icons/icon.png",
     "scheme": "templog",
     "userInterfaceStyle": "automatic",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
     "ios": {
       "bundleIdentifier": "com.saadofficial.templog",
-      "icon": "./assets/expo.icon",
+      "icon": "./assets/icons/icon.png",
       "supportsTablet": false,
       "infoPlist": {
         "NSSupportsLiveActivities": true,
@@ -18,16 +25,20 @@
           "fetch",
           "remote-notification",
           "processing"
-        ]
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.developer.usernotifications.time-sensitive": true
       }
     },
     "android": {
       "package": "com.saadofficial.templog",
       "adaptiveIcon": {
         "backgroundColor": "#0F1416",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/icons/icon-foreground.png",
+        "backgroundImage": "./assets/icons/icon-background.png",
+        "monochromeImage": "./assets/icons/icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
       "permissions": [
@@ -36,6 +47,16 @@
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.VIBRATE",
         "android.permission.RECEIVE_BOOT_COMPLETED"
+      ],
+      "blockedPermissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ]
     },
     "web": {
@@ -55,14 +76,87 @@
           }
         }
       ],
+      "expo-dev-client",
+      "expo-updates",
       "expo-sqlite",
-      "expo-secure-store",
-      "expo-widgets",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": false
+        }
+      ],
       "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icons/icon-monochrome.png",
+          "color": "#FF5A1F",
+          "defaultChannel": "general"
+        }
+      ],
+      "expo-task-manager",
       "expo-background-task",
-      "expo-build-properties",
-      "react-native-android-widget",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ],
+      [
+        "expo-widgets",
+        {
+          "bundleIdentifier": "com.saadofficial.templog.widgets",
+          "groupIdentifier": "group.com.saadofficial.templog",
+          "frequentUpdates": true,
+          "widgets": [
+            {
+              "name": "NextCheck",
+              "displayName": "Next check",
+              "description": "The next temperature check due and today's compliance.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "accessoryCircular",
+                  "accessoryInline"
+                ]
+              },
+              "android": null
+            }
+          ]
+        }
+      ],
+      [
+        "expo-live-updates",
+        {
+          "channelId": "cooling-live",
+          "channelName": "Cooling timers"
+        }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "NextCheck",
+              "label": "Templog next check",
+              "description": "The next temperature check due and today's compliance.",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "maxResizeWidth": "250dp",
+              "maxResizeHeight": "250dp",
+              "resizeMode": "horizontal|vertical",
+              "previewImage": "./assets/widget-preview/next-check-2x2.png",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
