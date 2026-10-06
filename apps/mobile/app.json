@@ -12,7 +12,8 @@
     },
     "updates": {
       "checkAutomatically": "ON_LOAD",
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/e269fbe0-b21f-40af-a3a6-2d6b7947a908"
     },
     "ios": {
       "bundleIdentifier": "com.saadofficial.templog",
@@ -22,6 +23,9 @@
         "NSSupportsLiveActivities": true,
         "NSSupportsLiveActivitiesFrequentUpdates": true,
         "UIBackgroundModes": [
+          "fetch",
+          "remote-notification",
+          "processing",
           "fetch",
           "remote-notification",
           "processing"
@@ -46,9 +50,22 @@
         "android.permission.POST_PROMOTED_NOTIFICATIONS",
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.POST_PROMOTED_NOTIFICATIONS",
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.VIBRATE",
         "android.permission.RECEIVE_BOOT_COMPLETED"
       ],
       "blockedPermissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
         "android.permission.ACCESS_FINE_LOCATION",
@@ -161,6 +178,30 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "ExpoWidgetsTarget",
+                  "bundleIdentifier": "com.saadofficial.templog.widgets",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.saadofficial.templog"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "e269fbe0-b21f-40af-a3a6-2d6b7947a908"
+      }
+    },
+    "owner": "sadi123"
   }
 }
