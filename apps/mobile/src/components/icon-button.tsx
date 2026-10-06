@@ -23,7 +23,7 @@ export type IconButtonProps = {
 export function IconButton({ icon, label, onPress, variant = 'plain', size = touchTarget, disabled, directional, style }: IconButtonProps) {
   const { colors } = useTheme();
   const [pressed, setPressed] = useState(false);
-  const bg = variant === 'filled' ? colors.action : variant === 'tinted' ? colors.surfaceSunken : 'transparent';
+  const bg = variant === 'filled' ? colors.action : variant === 'tinted' ? colors.fill : 'transparent';
   const fg = variant === 'filled' ? colors.onAction : colors.text;
   return (
     <Pressable

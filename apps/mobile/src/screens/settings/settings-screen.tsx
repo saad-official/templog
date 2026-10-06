@@ -175,7 +175,7 @@ export function SettingsScreen() {
           <ListRow title="Support" icon={icons.lifebuoy} onPress={() => open(links.support)} accessibilityRole="link" />
           <ListRow title="Terms" icon={icons.doc} onPress={() => open(links.terms)} accessibilityRole="link" />
         </ListGroup>
-        <AppText variant="caption" tone="tertiary" align="center">
+        <AppText variant="caption" tone="secondary" align="center">
           Templog is free. No ads, no subscriptions.
         </AppText>
       </View>

@@ -18,10 +18,12 @@ export default function TabsLayout() {
       tintColor={colors.text}
       minimizeBehavior="onScrollDown"
       backgroundColor={ANDROID ? colors.surfaceElevated : undefined}
-      indicatorColor={ANDROID ? colors.surfaceSunken : undefined}
+      indicatorColor={ANDROID ? colors.fill : undefined}
       iconColor={ANDROID ? { default: colors.textSecondary, selected: colors.text } : undefined}
       labelStyle={ANDROID ? { default: { color: colors.textSecondary }, selected: { color: colors.text } } : undefined}
       badgeBackgroundColor={colors.heat}
+      // Android only: dark ink on heat is AA (5.3:1); the default white is 3.6:1 on light, 3.1:1 on dark.
+      badgeTextColor={ANDROID ? colors.onHeat : undefined}
     >
       <NativeTabs.Trigger name="today">
         <NativeTabs.Trigger.Icon sf={icons.today.sf} md={icons.today.md} />

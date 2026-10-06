@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { useReduceTransparency } from '@/hooks/use-accessibility';
-import { radius as radii, spacing, useTheme, withAlpha, type RadiusToken } from '@/theme';
+import { hairline, radius as radii, spacing, useTheme, withAlpha, type RadiusToken } from '@/theme';
 
 const CAN_GLASS = process.env.EXPO_OS === 'ios' && isLiquidGlassAvailable() && isGlassEffectAPIAvailable();
 
@@ -43,7 +43,9 @@ export function GlassCard({ children, radius = 'lg', padding = spacing.md, tint 
   }
   if (process.env.EXPO_OS === 'ios' && !reduce) {
     return (
-      <View style={[{ borderRadius: radii[radius], borderCurve: 'continuous', boxShadow: shadow('md') }, style]}>
+      // No boxShadow here: the material is translucent, and RN masks the shadow with a circular-corner
+      // rect while the blur uses continuous corners, so a dark rim showed through at the corners.
+      <View style={[{ borderRadius: radii[radius], borderCurve: 'continuous' }, style]}>
         <BlurView
           tint={isDark ? 'systemThickMaterialDark' : 'systemThickMaterialLight'}
           intensity={90}
@@ -58,5 +60,7 @@ export function GlassCard({ children, radius = 'lg', padding = spacing.md, tint 
       </View>
     );
   }
-  return <View style={[shape, { backgroundColor: soft ?? colors.surfaceElevated, boxShadow: shadow('md') }, style]}>{children}</View>;
+  // Solid: a shadow cannot lift a card off near-black steel, so dark mode adds a hairline edge.
+  const edge: ViewStyle | null = isDark ? { borderWidth: hairline, borderColor: colors.border } : null;
+  return <View style={[shape, { backgroundColor: soft ?? colors.surfaceElevated, boxShadow: shadow('md') }, edge, style]}>{children}</View>;
 }

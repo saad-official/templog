@@ -78,7 +78,7 @@ export function CheckpointRow(props: CheckpointRowProps) {
             </AppText>
           </>
         ) : (
-          <AppText variant="callout" tone="tertiary">
+          <AppText variant="callout" tone="secondary">
             No readings
           </AppText>
         )}

@@ -25,7 +25,7 @@ export function EmptyState({ icon, title, body, action }: EmptyStateProps) {
           height: 72,
           borderRadius: radius.lg,
           borderCurve: 'continuous',
-          backgroundColor: colors.surfaceSunken,
+          backgroundColor: colors.fill,
           alignItems: 'center',
           justifyContent: 'center',
         }}

@@ -69,8 +69,10 @@ export function ReadingEntry({
   const { height } = useWindowDimensions();
   const compact = height < 760;
   const locked = !!stamp || !!saving;
+  // Short screens (iPhone SE class, in a sheet) need every point for the keypad and Save button.
+  const rhythm = compact ? spacing.xs : spacing.sm;
   return (
-    <View style={{ flex: 1, paddingHorizontal: spacing.md, paddingTop: spacing.sm, paddingBottom: Math.max(insets.bottom, spacing.md), gap: spacing.sm }}>
+    <View style={{ flex: 1, paddingHorizontal: spacing.md, paddingTop: rhythm, paddingBottom: Math.max(insets.bottom, spacing.md), gap: rhythm }}>
       {context}
 
       <View
@@ -82,7 +84,7 @@ export function ReadingEntry({
           borderCurve: 'continuous',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: spacing.md,
+          padding: compact ? spacing.sm : spacing.md,
           gap: spacing.xs,
         }}
       >
@@ -98,7 +100,7 @@ export function ReadingEntry({
               ) : null}
             </>
           ) : (
-            <AppText variant="callout" tone="tertiary">
+            <AppText variant="callout" tone="secondary">
               Type the temperature
             </AppText>
           )}

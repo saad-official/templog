@@ -41,7 +41,7 @@ function StageRow({ stage, state, limit, due, reading }: { stage: 1 | 2; state: 
           borderRadius: 16,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: state === 'pass' ? colors.passSoft : state === 'fail' || state === 'open' ? colors.heatSoft : colors.surfaceSunken,
+          backgroundColor: state === 'pass' ? colors.passSoft : state === 'fail' || state === 'open' ? colors.heatSoft : colors.fill,
         }}
       >
         {state === 'pass' ? (
@@ -142,7 +142,7 @@ export function CoolingDetailScreen() {
       ) : null}
 
       {needsAction ? (
-        <View style={{ backgroundColor: colors.heatSoft, borderRadius: radius.lg, padding: spacing.md, gap: spacing.sm }}>
+        <View style={{ backgroundColor: colors.heatSoft, borderRadius: radius.lg, borderCurve: 'continuous', padding: spacing.md, gap: spacing.sm }}>
           <AppText variant="body" weight="600" tone="heat">
             This item missed a cooling stage. Record what you did with it.
           </AppText>

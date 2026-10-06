@@ -72,7 +72,7 @@ export function KitchenSettingsScreen() {
       />
 
       <Field label="Time zone" hint="Checks, days and reports follow this zone, including daylight-saving changes.">
-        <View style={{ backgroundColor: colors.surfaceSunken, borderRadius: radius.sm, padding: spacing.sm, gap: spacing.xs }}>
+        <View style={{ backgroundColor: colors.surfaceElevated, borderRadius: radius.sm, padding: spacing.sm, gap: spacing.xs }}>
           <AppText variant="body" selectable>
             {kitchen.tz.replace(/_/g, ' ')}
           </AppText>

@@ -1,6 +1,8 @@
-import { Pressable, View } from 'react-native';
+import type { ReactNode } from 'react';
+import { Platform, Pressable, View } from 'react-native';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FullWindowOverlay } from 'react-native-screens';
 
 import { createStore, useStore } from '@/data';
 import { haptics } from '@/native/haptics';
@@ -40,8 +42,18 @@ export function dismissToast(id?: number): void {
 const ENTER = FadeInDown.duration(motion.duration.base).easing(easing.out);
 const EXIT = FadeOutDown.duration(motion.duration.fast + 50).easing(easing.out);
 
-/** Room for the tab bar so toasts never cover it. */
-const TAB_BAR_CLEARANCE = 64;
+/** Room for the tab bar so toasts never cover it (the Material 3 navigation bar is 80 dp tall). */
+const TAB_BAR_CLEARANCE = Platform.select({ android: 80 + spacing.xs, default: 64 });
+
+/**
+ * iOS presents form sheets (the keypad, editors) in their own view controller above the root view,
+ * so a root-level toast ("Add your initials first", save errors) would sit hidden behind them. The
+ * full-window overlay keeps it on top without trapping VoiceOver. Android sheets share the window.
+ */
+function OnTop({ children }: { children: ReactNode }) {
+  if (process.env.EXPO_OS !== 'ios') return children;
+  return <FullWindowOverlay unstable_accessibilityContainerViewIsModal={false}>{children}</FullWindowOverlay>;
+}
 
 /** Mount once at the root. Undo for a logged reading lives here. */
 export function ToastHost() {
@@ -50,56 +62,58 @@ export function ToastHost() {
   const { colors, shadow } = useTheme();
   if (!toast) return null;
   return (
-    <View
-      pointerEvents="box-none"
-      style={{ position: 'absolute', start: 0, end: 0, bottom: insets.bottom + TAB_BAR_CLEARANCE, paddingHorizontal: spacing.md }}
-    >
-      <Animated.View
-        key={toast.id}
-        entering={ENTER}
-        exiting={EXIT}
-        accessibilityLiveRegion="polite"
-        accessibilityRole="alert"
-        style={{
-          minHeight: touchTarget + spacing.xs,
-          borderRadius: radius.md,
-          borderCurve: 'continuous',
-          backgroundColor: colors.inverseSurface,
-          boxShadow: shadow('lg'),
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingStart: spacing.md,
-          paddingEnd: toast.actionLabel ? spacing.xs : spacing.md,
-          gap: spacing.xs,
-        }}
+    <OnTop>
+      <View
+        pointerEvents="box-none"
+        style={{ position: 'absolute', start: 0, end: 0, bottom: insets.bottom + TAB_BAR_CLEARANCE, paddingHorizontal: spacing.md }}
       >
-        <AppText variant="callout" tone="inverse" style={{ flex: 1, paddingVertical: spacing.xs }}>
-          {toast.message}
-        </AppText>
-        {toast.actionLabel ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={toast.actionLabel}
-            hitSlop={spacing.xs}
-            onPress={() => {
-              haptics.acknowledged();
-              toast.onAction?.();
-              dismissToast(toast.id);
-            }}
-            style={({ pressed }) => ({
-              minHeight: touchTarget,
-              justifyContent: 'center',
-              paddingHorizontal: spacing.md,
-              borderRadius: radius.sm,
-              opacity: pressed ? 0.6 : 1,
-            })}
-          >
-            <AppText variant="callout" weight="700" style={{ color: colors.inverseAction }}>
-              {toast.actionLabel}
-            </AppText>
-          </Pressable>
-        ) : null}
-      </Animated.View>
-    </View>
+        <Animated.View
+          key={toast.id}
+          entering={ENTER}
+          exiting={EXIT}
+          accessibilityLiveRegion="polite"
+          accessibilityRole="alert"
+          style={{
+            minHeight: touchTarget + spacing.xs,
+            borderRadius: radius.md,
+            borderCurve: 'continuous',
+            backgroundColor: colors.inverseSurface,
+            boxShadow: shadow('lg'),
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingStart: spacing.md,
+            paddingEnd: toast.actionLabel ? spacing.xs : spacing.md,
+            gap: spacing.xs,
+          }}
+        >
+          <AppText variant="callout" tone="inverse" style={{ flex: 1, paddingVertical: spacing.xs }}>
+            {toast.message}
+          </AppText>
+          {toast.actionLabel ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={toast.actionLabel}
+              hitSlop={spacing.xs}
+              onPress={() => {
+                haptics.acknowledged();
+                toast.onAction?.();
+                dismissToast(toast.id);
+              }}
+              style={({ pressed }) => ({
+                minHeight: touchTarget,
+                justifyContent: 'center',
+                paddingHorizontal: spacing.md,
+                borderRadius: radius.sm,
+                opacity: pressed ? 0.6 : 1,
+              })}
+            >
+              <AppText variant="callout" weight="700" style={{ color: colors.inverseAction }}>
+                {toast.actionLabel}
+              </AppText>
+            </Pressable>
+          ) : null}
+        </Animated.View>
+      </View>
+    </OnTop>
   );
 }

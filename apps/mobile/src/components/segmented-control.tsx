@@ -24,7 +24,9 @@ export function SegmentedControl<T extends string>({ options, value, onChange, a
       <NativeSegmentedControl
         values={options.map((o) => o.label)}
         selectedIndex={index}
-        tintColor={colors.action}
+        // Android maps the tint to the selected segment's container only; its label keeps the Material
+        // on-container ink (dark in light, light in dark), so an ink fill there hid the selected label.
+        tintColor={process.env.EXPO_OS === 'android' ? colors.border : colors.action}
         appearance={scheme}
         onChange={({ nativeEvent }) => {
           const next = options[nativeEvent.selectedSegmentIndex];

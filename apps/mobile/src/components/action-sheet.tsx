@@ -20,9 +20,10 @@ export type SheetAction = {
  * `Link.Menu` context menus instead).
  */
 export function ActionSheet({ title, actions, visible, onClose }: { title?: string; actions: SheetAction[]; visible: boolean; onClose: () => void }) {
-  const { colors } = useTheme();
+  const { colors, scheme } = useTheme();
   return (
-    <Host matchContents style={{ position: 'absolute' }}>
+    // colorScheme: the sheet chrome (drag handle, scrim) follows the in-app Appearance override.
+    <Host matchContents colorScheme={scheme} style={{ position: 'absolute' }}>
       <BottomSheet isPresented={visible} onDismiss={onClose} containerColor={colors.surfaceElevated}>
         <View style={{ paddingBottom: spacing.lg }}>
           {title ? (

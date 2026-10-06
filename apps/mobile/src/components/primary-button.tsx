@@ -50,13 +50,16 @@ export function PrimaryButton({
   const [pressed, setPressed] = useState(false);
   const inactive = !!disabled || !!loading;
 
-  const fill = {
+  const enabled = {
     primary: { bg: colors.action, fg: colors.onAction },
     heat: { bg: colors.heat, fg: colors.onHeat },
-    secondary: { bg: colors.surfaceSunken, fg: colors.text },
+    secondary: { bg: colors.fill, fg: colors.text },
     ghost: { bg: 'transparent', fg: colors.text },
     destructive: { bg: colors.heatSoft, fg: colors.heatText },
   }[variant];
+  // Disabled reads as inert steel, not a washed-out fill (45% ink / heat turned muddy grey or brown,
+  // worst in dark mode). Loading keeps the variant so the spinner stays on the action's colour.
+  const fill = disabled ? { bg: variant === 'ghost' ? 'transparent' : colors.fill, fg: colors.textTertiary } : enabled;
 
   const height = size === 'lg' ? bigTarget : Math.max(touchTarget, 48);
 
@@ -85,7 +88,6 @@ export function PrimaryButton({
           alignItems: 'center',
           justifyContent: 'center',
           gap: spacing.xs,
-          opacity: disabled ? 0.45 : 1,
           transform: [{ scale: pressed && !inactive ? 0.97 : 1 }],
           transitionProperty: 'transform',
           transitionDuration: 120,

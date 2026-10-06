@@ -55,7 +55,7 @@ export function TextField({ label, hint, error, style, multiline, ref, ...props 
           textStyles.body,
           {
             color: colors.text,
-            backgroundColor: colors.surfaceSunken,
+            backgroundColor: colors.fill,
             borderRadius: radius.sm,
             borderCurve: 'continuous',
             paddingHorizontal: spacing.md,
@@ -110,7 +110,7 @@ export function Stepper({
         flexDirection: 'row',
         alignItems: 'center',
         gap: spacing.xs,
-        backgroundColor: colors.surfaceSunken,
+        backgroundColor: colors.fill,
         borderRadius: radius.pill,
         padding: spacing.xxs,
         alignSelf: 'flex-start',
@@ -163,7 +163,7 @@ export function ChoiceChips<T extends string | number>({
               justifyContent: 'center',
               flexDirection: 'row',
               gap: spacing.xxs,
-              backgroundColor: selected ? colors.action : pressed ? colors.border : colors.surfaceSunken,
+              backgroundColor: selected ? colors.action : pressed ? colors.border : colors.fill,
             })}
           >
             {selected && multi ? <Icon name={icons.check} size={14} color={colors.onAction} weight="bold" /> : null}
@@ -214,7 +214,7 @@ export function TimeField({ value, onChange, label }: { value: string; onChange:
           flexDirection: 'row',
           alignItems: 'center',
           gap: spacing.xs,
-          backgroundColor: pressed ? colors.border : colors.surfaceSunken,
+          backgroundColor: pressed ? colors.border : colors.fill,
         })}
       >
         <Icon name={icons.clock} size={18} color={colors.textSecondary} />

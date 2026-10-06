@@ -19,7 +19,7 @@ function Point({ icon, text }: { icon: IconName; text: string }) {
   const { colors } = useTheme();
   return (
     <View style={{ flexDirection: 'row', gap: spacing.md, alignItems: 'flex-start' }}>
-      <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceSunken, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.fill, alignItems: 'center', justifyContent: 'center' }}>
         <Icon name={icon} size={18} color={colors.text} />
       </View>
       <AppText variant="body" tone="secondary" style={{ flex: 1, paddingTop: spacing.xxs }}>
@@ -64,7 +64,7 @@ export function RemindersPrimingScreen() {
         }}
       >
         <View style={{ alignItems: 'center', gap: spacing.md }}>
-          <View style={{ width: 88, height: 88, borderRadius: radius.lg, borderCurve: 'continuous', backgroundColor: colors.surfaceSunken, alignItems: 'center', justifyContent: 'center' }}>
+          <View style={{ width: 88, height: 88, borderRadius: radius.lg, borderCurve: 'continuous', backgroundColor: colors.fill, alignItems: 'center', justifyContent: 'center' }}>
             <Icon name={icons.bell} size={44} color={colors.text} />
           </View>
           <AppText variant="title" align="center" accessibilityRole="header">

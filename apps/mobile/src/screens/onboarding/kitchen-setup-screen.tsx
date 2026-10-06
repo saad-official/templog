@@ -157,7 +157,7 @@ export function KitchenSetupScreen() {
         </Field>
 
         <Field label="Time zone" hint="Checks follow this kitchen's local time, including daylight-saving changes.">
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs, backgroundColor: colors.surfaceSunken, borderRadius: radius.sm, padding: spacing.sm }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.xs, backgroundColor: colors.fill, borderRadius: radius.sm, padding: spacing.sm }}>
             <AppText variant="body" selectable style={{ flex: 1 }}>
               {tz.replace(/_/g, ' ')}
             </AppText>

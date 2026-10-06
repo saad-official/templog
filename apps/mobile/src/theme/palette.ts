@@ -14,6 +14,13 @@ export type ThemeColors = ColorPalette & {
   onAction: string;
   /** Dimmed backdrop behind transient overlays. */
   scrim: string;
+  /**
+   * Control fill (text fields, chips, steppers, secondary buttons, skeletons, stat tiles, icon
+   * wells): reads on the page surface, sheets and elevated cards alike. `surfaceSunken` stays for
+   * the keypad well and pressed rows on elevated groups; in dark it is darker than the page, so a
+   * control on `surface` painted with it disappears (1.05:1).
+   */
+  fill: string;
   /** Unfilled part of rings and bars. */
   track: string;
   /** Keypad keys: raised steel caps on the sunken well. */
@@ -40,6 +47,14 @@ export function withAlpha(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+/** Blends two `#RRGGBB` roles (`t` = 0 → `a`, 1 → `b`) so derived roles stay on the steel ramp. */
+function mix(a: string, b: string, t: number): string {
+  const [ar, ag, ab] = rgb(a);
+  const [br, bg, bb] = rgb(b);
+  const ch = (x: number, y: number) => Math.round(x + (y - x) * t).toString(16).padStart(2, '0');
+  return `#${ch(ar, br)}${ch(ag, bg)}${ch(ab, bb)}`.toUpperCase();
+}
+
 const SHADOW_RGB = rgb(SHADOW_COLOR).join(', ');
 const cache = new Map<ColorScheme, AppTheme>();
 
@@ -49,8 +64,14 @@ export function buildAppTheme(scheme: ColorScheme): AppTheme {
   const base = palettes[scheme];
   const inverse = palettes[scheme === 'dark' ? 'light' : 'dark'];
   const isDark = scheme === 'dark';
+  // Light: the sunken steel already reads on white and on the page. Dark: a lifted steel between
+  // the card and the border (1.4:1 on the page, 1.25:1 on cards) instead of a near-black hole.
+  const fill = isDark ? mix(base.surfaceElevated, base.border, 0.5) : base.surfaceSunken;
   const colors: ThemeColors = {
     ...base,
+    // Native hairlines are one device pixel, far thinner than the 1px CSS line the shared token is
+    // tuned for: lean towards `border` so list separators stay visible (1.5:1 light, 1.4:1 dark).
+    separator: mix(base.separator, base.border, isDark ? 0.6 : 0.5),
     inverseSurface: inverse.surfaceElevated,
     inverseText: inverse.text,
     inverseAction: inverse.heatText,
@@ -58,8 +79,10 @@ export function buildAppTheme(scheme: ColorScheme): AppTheme {
     actionPressed: base.textSecondary,
     onAction: base.surfaceElevated,
     scrim: `rgba(${SHADOW_RGB}, ${isDark ? 0.6 : 0.35})`,
-    track: base.surfaceSunken,
-    key: base.surfaceElevated,
+    fill,
+    track: fill,
+    // Dark caps must be lighter than the near-black well, or the keypad reads as floating digits.
+    key: isDark ? fill : base.surfaceElevated,
     keyPressed: base.border,
   };
   const levels = shadows[scheme];

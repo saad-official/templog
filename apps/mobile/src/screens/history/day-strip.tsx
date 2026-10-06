@@ -54,7 +54,7 @@ export function DayStrip({ days, selected, onSelect }: { days: StripDay[]; selec
               borderCurve: 'continuous',
               alignItems: 'center',
               gap: spacing.xxs,
-              backgroundColor: active ? colors.action : pressed ? colors.surfaceSunken : colors.surfaceElevated,
+              backgroundColor: active ? colors.action : pressed ? colors.fill : colors.surfaceElevated,
             })}
           >
             <AppText variant="caption" maxFontSizeMultiplier={CHROME_FONT_CAP} style={{ color: active ? colors.onAction : colors.textSecondary }}>

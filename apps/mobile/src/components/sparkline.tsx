@@ -51,7 +51,7 @@ export function Sparkline({ points, limits, height = 96, accessibilityLabel }: S
     >
       {points.length === 0 ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <AppText variant="callout" tone="tertiary">
+          <AppText variant="callout" tone="secondary">
             No readings in this period
           </AppText>
         </View>
@@ -60,19 +60,14 @@ export function Sparkline({ points, limits, height = 96, accessibilityLabel }: S
         ? [limits.min, limits.max]
             .filter((v): v is number => v !== undefined)
             .map((v) => (
+              // Dashes only render with an equal border on every side (Android draws a one-sided
+              // dashed border solid), so a fully bordered strip is clipped to its top edge.
               <View
                 key={`limit-${v}`}
-                style={{
-                  position: 'absolute',
-                  left: 0,
-                  right: 0,
-                  top: y(v),
-                  borderTopWidth: 1,
-                  borderStyle: 'dashed',
-                  borderColor: colors.heat,
-                  opacity: 0.7,
-                }}
-              />
+                style={{ position: 'absolute', left: 0, right: 0, top: y(v), height: LINE / 2, overflow: 'hidden', opacity: 0.7 }}
+              >
+                <View style={{ position: 'absolute', top: 0, left: -LINE, right: -LINE, height: LINE * 2, borderWidth: LINE / 2, borderStyle: 'dashed', borderColor: colors.heat }} />
+              </View>
             ))
         : null}
       {coords.slice(1).map((c, i) => {

@@ -32,7 +32,7 @@ export function JoinCodeCard({ code, kitchenName }: { code: string; kitchenName:
       <AppText variant="callout" tone="secondary" weight="600">
         Join code
       </AppText>
-      <View style={{ backgroundColor: colors.surfaceSunken, borderRadius: radius.md, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm }}>
+      <View style={{ backgroundColor: colors.fill, borderRadius: radius.md, paddingHorizontal: spacing.lg, paddingVertical: spacing.sm }}>
         <AppText variant="display" selectable accessibilityLabel={`Join code ${spelled(code)}`} style={{ letterSpacing: 6 }}>
           {code}
         </AppText>

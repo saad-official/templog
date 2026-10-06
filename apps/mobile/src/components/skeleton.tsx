@@ -19,7 +19,7 @@ export function Skeleton({ width = '100%', height = 16, radius = 'sm' }: { width
         width,
         height,
         borderRadius: radii[radius],
-        backgroundColor: colors.surfaceSunken,
+        backgroundColor: colors.fill,
         ...(reduced
           ? null
           : {

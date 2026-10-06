@@ -85,7 +85,7 @@ export function InitialsChip({ value, onChange }: { value: string; onChange: (in
         gap: spacing.xxs,
         paddingHorizontal: spacing.sm,
         borderRadius: radius.pill,
-        backgroundColor: missing ? colors.warningSoft : pressed ? colors.border : colors.surfaceSunken,
+        backgroundColor: missing ? colors.warningSoft : pressed ? colors.border : colors.fill,
       })}
     >
       <Icon name={icons.initials} size={16} color={missing ? colors.warningText : colors.textSecondary} />

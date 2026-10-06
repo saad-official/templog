@@ -3,19 +3,28 @@ import { Pressable } from 'react-native';
 
 import { CheckpointRow, checkpointRowLabel } from '@/components/checkpoint-row';
 import { kindIcons } from '@/constants/icons';
+import { useTheme } from '@/theme';
 
 import { openCheckFor, openHistory, openLog, snooze } from './board-actions';
 import type { BoardRowProps } from './board-row.types';
 
 /** Tap logs a reading; press and hold for Snooze 15 / History (native context menu). */
 export function BoardRow({ item, row }: BoardRowProps) {
+  const { colors } = useTheme();
   const scheduledFor = openCheckFor(item);
   const open = item.current && (item.current.state === 'due' || item.current.state === 'overdue') ? item.current : null;
   const params = scheduledFor ? { checkpointId: item.checkpoint.id, scheduledFor } : { checkpointId: item.checkpoint.id };
   return (
     <Link href={{ pathname: '/log/[checkpointId]', params }} asChild>
       <Link.Trigger>
-        <Pressable accessibilityLabel={checkpointRowLabel(row)} accessibilityHint="Opens the keypad to log a reading. Press and hold for more">
+        {/* Opaque on purpose: the context-menu preview takes the trigger's background, and a clear
+            one lifts the glyphs alone with a shadow traced around every letter and pill. */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={checkpointRowLabel(row)}
+          accessibilityHint="Opens the keypad to log a reading. Press and hold for more"
+          style={{ backgroundColor: colors.surfaceElevated }}
+        >
           {({ pressed }) => <CheckpointRow {...row} pressed={pressed} />}
         </Pressable>
       </Link.Trigger>

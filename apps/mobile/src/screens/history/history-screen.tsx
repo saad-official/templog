@@ -37,7 +37,7 @@ const STRIP_DAYS = 14;
 function Stat({ label, value, tone }: { label: string; value: string; tone?: 'heat' | 'pass' }) {
   const { colors } = useTheme();
   return (
-    <View style={{ flex: 1, minWidth: 92, gap: 2, padding: spacing.sm, borderRadius: radius.md, backgroundColor: colors.surfaceSunken }}>
+    <View style={{ flex: 1, minWidth: 92, gap: 2, padding: spacing.sm, borderRadius: radius.md, backgroundColor: colors.fill }}>
       <AppText variant="caption" tone="secondary">
         {label}
       </AppText>

@@ -57,7 +57,7 @@ function CheckChip({ time, attached, onToggle }: { time: string | null; attached
         alignSelf: 'flex-start',
         paddingHorizontal: spacing.sm,
         borderRadius: radius.pill,
-        backgroundColor: pressed ? colors.border : attached ? colors.surfaceSunken : 'transparent',
+        backgroundColor: pressed ? colors.border : attached ? colors.fill : 'transparent',
         borderWidth: attached ? 0 : 1,
         borderColor: colors.border,
       })}

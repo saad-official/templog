@@ -65,7 +65,7 @@ export function CoolingCard({ item, startedLabel, dueSoon, onOpen, onLog }: Cool
               <AppText variant="callout" tone="secondary" tabular>
                 {item.label}
               </AppText>
-              <AppText variant="caption" tone="tertiary" tabular>
+              <AppText variant="caption" tone="secondary" tabular>
                 {item.initials ? `Off heat ${startedLabel} · ${item.initials}` : `Off heat ${startedLabel}`}
               </AppText>
             </View>

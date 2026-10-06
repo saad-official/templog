@@ -15,11 +15,11 @@ const META: Record<PillStatus, Meta> = {
   overdue: { label: 'Overdue', fg: 'onHeat', bg: 'heat', icon: icons.overdue },
   due: { label: 'Due now', fg: 'onWarning', bg: 'warning', icon: icons.due },
   missed: { label: 'Missed', fg: 'heatText', bg: 'heatSoft', icon: icons.missed },
-  upcoming: { label: 'Upcoming', fg: 'textSecondary', bg: 'surfaceSunken', icon: icons.upcoming },
+  upcoming: { label: 'Upcoming', fg: 'textSecondary', bg: 'fill', icon: icons.upcoming },
   done: { label: 'Done', fg: 'passText', bg: 'passSoft', icon: icons.pass },
   logged: { label: 'Logged', fg: 'passText', bg: 'passSoft', icon: icons.pass },
-  none: { label: 'No checks today', fg: 'textSecondary', bg: 'surfaceSunken', icon: icons.clock },
-  snoozed: { label: 'Snoozed', fg: 'textSecondary', bg: 'surfaceSunken', icon: icons.snooze },
+  none: { label: 'No checks today', fg: 'textSecondary', bg: 'fill', icon: icons.clock },
+  snoozed: { label: 'Snoozed', fg: 'textSecondary', bg: 'fill', icon: icons.snooze },
 };
 
 export function statusLabel(status: PillStatus): string {
@@ -68,7 +68,7 @@ export function CountBadge({ count, tone = 'heat' }: { count: number; tone?: 'he
         borderRadius: radius.pill,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: tone === 'heat' ? colors.heat : colors.surfaceSunken,
+        backgroundColor: tone === 'heat' ? colors.heat : colors.fill,
       }}
     >
       <AppText variant="caption" weight="700" tabular maxFontSizeMultiplier={1.2} style={{ color: tone === 'heat' ? colors.onHeat : colors.text }}>

@@ -26,7 +26,7 @@ import { teamErrorMessage } from './team-errors';
 function Avatar({ text }: { text: string }) {
   const { colors } = useTheme();
   return (
-    <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.surfaceSunken, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.fill, alignItems: 'center', justifyContent: 'center' }}>
       <AppText variant="callout" weight="700" maxFontSizeMultiplier={1.3}>
         {text}
       </AppText>
