@@ -49,7 +49,7 @@ export function CoolingScreen() {
           icon={icons.cooling}
           title="No food cooling"
           body={`Start a timer when cooked food comes off heat. Templog counts stage 1 (${stageLimitLabel(1, unit)}) and stage 2 (${stageLimitLabel(2, unit)}) and prompts for each reading.`}
-          action={<PrimaryButton title="Start cooling" icon={icons.timerStart} size="lg" variant="heat" block={false} onPress={start} />}
+          action={<PrimaryButton title="Start cooling" icon={icons.timerStart} size="lg" variant="heat" block={false} style={{ alignSelf: 'center' }} onPress={start} />}
         />
       ) : (
         <View style={{ gap: spacing.sm }}>

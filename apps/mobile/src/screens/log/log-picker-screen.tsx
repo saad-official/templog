@@ -40,7 +40,7 @@ export function LogPickerScreen() {
           icon={icons.checkpoints}
           title="Nothing to log yet"
           body="Add a checkpoint (a cooler, a hot well, a freezer) and it shows up here."
-          action={<PrimaryButton title="Add checkpoint" icon={icons.add} block={false} onPress={() => router.push('/checkpoint-editor')} />}
+          action={<PrimaryButton title="Add checkpoint" icon={icons.add} block={false} style={{ alignSelf: 'center' }} onPress={() => router.push('/checkpoint-editor')} />}
         />
       ) : (
         <View style={{ gap: spacing.xs }}>

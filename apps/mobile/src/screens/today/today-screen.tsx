@@ -126,7 +126,7 @@ export function TodayScreen() {
           icon={icons.today}
           title="Add your first checkpoint"
           body="A checkpoint is anything you take a temperature of: the walk-in, a reach-in, the hot well. Templog schedules its checks and reminds the line."
-          action={<PrimaryButton title="Add checkpoint" icon={icons.add} size="lg" block={false} onPress={() => router.push('/checkpoint-editor')} />}
+          action={<PrimaryButton title="Add checkpoint" icon={icons.add} size="lg" block={false} style={{ alignSelf: 'center' }} onPress={() => router.push('/checkpoint-editor')} />}
         />
       </Screen>
     );

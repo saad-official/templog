@@ -100,7 +100,7 @@ export function CheckpointsScreen() {
           icon={icons.checkpoints}
           title="No checkpoints"
           body="Add each unit you take a temperature of. Limits start at the FDA Food Code defaults."
-          action={<PrimaryButton title="Add checkpoint" icon={icons.add} block={false} onPress={() => edit()} />}
+          action={<PrimaryButton title="Add checkpoint" icon={icons.add} block={false} style={{ alignSelf: 'center' }} onPress={() => edit()} />}
         />
       ) : (
         <View style={{ gap: spacing.xs }}>
