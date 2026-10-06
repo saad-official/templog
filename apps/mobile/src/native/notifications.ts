@@ -106,7 +106,6 @@ export function setupNotifications(): Promise<void> {
           lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
           vibrationPattern: [0, 250, 150, 250],
           enableVibrate: true,
-          sound: 'default',
         });
         await Notifications.setNotificationChannelAsync(CHANNEL_COOLING, {
           name: 'Cooling readings',
@@ -115,7 +114,6 @@ export function setupNotifications(): Promise<void> {
           lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
           vibrationPattern: [0, 400, 200, 400],
           enableVibrate: true,
-          sound: 'default',
         });
         // expo-live-updates creates this channel at default importance; the prompts already chime
         // on `cooling`, so the ongoing timers stay silent.
